@@ -1,0 +1,71 @@
+version: '3'
+
+services:
+  mpc-container:
+    image: mpc-kafka
+    networks:
+      - mec-network
+    depends_on:
+      - init-kafka
+
+  astar-container:
+    image: astar-app
+    networks:
+      - mec-network
+    depends_on:
+      - init-kafka
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - mec-network
+  
+  init-kafka:
+    image: wurstmeister/kafka
+    networks:
+      - mec-network
+    entrypoint: ['/bin/sh', '-c']
+    depends_on:
+      - kafka
+    command: |
+     "
+     # block until Kafka is reachable
+     /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list
+     echo -e 'Creating kafka topics'
+     /opt/kafka/bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 --topic mpc_topic
+     /opt/kafka/bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 --topic astar_topic
+     /opt/kafka/bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 --topic tcp_server_topic
+     echo -e 'Successfully created the following topics:'
+     /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list
+     "
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    networks:
+      - mec-network
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_MESSAGE_MAX_BYTES: 15728640        # For 15 MB
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 15728640  # For 15 MB
+    depends_on:
+      - zookeeper
+      
+  tcp-gateway:
+    image: tcp-kafka
+    ports:
+      - "2222:2222"
+    networks:
+      - mec-network
+    depends_on:
+      - init-kafka
+      - astar-container
+      - mpc-container
+
+networks:
+  mec-network:
+    driver: bridge

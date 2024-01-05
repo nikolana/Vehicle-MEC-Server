@@ -1,0 +1,4 @@
+numpy 
+opencv-python-headless 
+pyastar2d 
+kafka-python
