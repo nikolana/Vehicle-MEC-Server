@@ -38,6 +38,7 @@ def main():
     stream = BytesIO(buffer)
     image = Image.open(stream).convert("RGBA")
     stream.close()
+    image.save("received_image1.png")
     image.show()
 
     print("Sent: ", client_socket.send("maze_large.png".encode()))
@@ -58,8 +59,10 @@ def main():
     stream = BytesIO(buffer)
     image = Image.open(stream).convert("RGBA")
     stream.close()
+    image.save("received_image2.png")
     image.show()
 
+    
     print("Image received and saved as 'received_image.png'")
 
     # Close the connection
