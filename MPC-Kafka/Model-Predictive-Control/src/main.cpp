@@ -21,24 +21,24 @@ double rad2deg(double x) { return x * 180 / pi(); }
 // If there is data the JSON object in string format will be returned,
 // else the empty string "" will be returned.
 string hasData(string s) {
-  auto found_null = s.find("null");
-  auto b1 = s.find_first_of("[");
-  auto b2 = s.rfind("}]");
-  if (found_null != string::npos) {
+auto found_null = s.find("null");
+auto b1 = s.find_first_of("[");
+auto b2 = s.rfind("}]");
+if (found_null != string::npos) {
     return "";
-  } else if (b1 != string::npos && b2 != string::npos) {
-    return s.substr(b1, b2 - b1 + 2);
-  }
-  return "";
+} else if (b1 != string::npos && b2 != string::npos) {
+	return s.substr(b1, b2 - b1 + 2);
+}
+return "";
 }
 
 // Evaluate a polynomial.
 double polyeval(Eigen::VectorXd coeffs, double x) {
-  double result = 0.0;
-  for (int i = 0; i < coeffs.size(); i++) {
-    result += coeffs[i] * pow(x, i);
-  }
-  return result;
+double result = 0.0;
+for (int i = 0; i < coeffs.size(); i++) {
+	result += coeffs[i] * pow(x, i);
+}
+return result;
 }
 
 // Fit a polynomial.
@@ -46,35 +46,35 @@ double polyeval(Eigen::VectorXd coeffs, double x) {
 // https://github.com/JuliaMath/Polynomials.jl/blob/master/src/Polynomials.jl#L676-L716
 Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
                         int order) {
-  assert(xvals.size() == yvals.size());
-  assert(order >= 1 && order <= xvals.size() - 1);
-  Eigen::MatrixXd A(xvals.size(), order + 1);
+assert(xvals.size() == yvals.size());
+assert(order >= 1 && order <= xvals.size() - 1);
+Eigen::MatrixXd A(xvals.size(), order + 1);
 
-  for (int i = 0; i < xvals.size(); i++) {
-    A(i, 0) = 1.0;
-  }
+for (int i = 0; i < xvals.size(); i++) {
+	A(i, 0) = 1.0;
+}
 
-  for (int j = 0; j < xvals.size(); j++) {
-    for (int i = 0; i < order; i++) {
-      A(j, i + 1) = A(j, i) * xvals(j);
-    }
-  }
+for (int j = 0; j < xvals.size(); j++) {
+	for (int i = 0; i < order; i++) {
+		A(j, i + 1) = A(j, i) * xvals(j);
+	}
+}
 
-  auto Q = A.householderQr();
-  auto result = Q.solve(yvals);
-  return result;
+auto Q = A.householderQr();
+auto result = Q.solve(yvals);
+return result;
 }
 
 // convert from map coordinate to car coordinates
 void map2car(double px, double py, double psi, const vector<double>& ptsx_map, const vector<double>& ptsy_map,
-             Eigen::VectorXd & ptsx_car, Eigen::VectorXd & ptsy_car){
+			Eigen::VectorXd & ptsx_car, Eigen::VectorXd & ptsy_car){
 
-  for(size_t i=0; i< ptsx_map.size(); i++){
-    double dx = ptsx_map[i] - px;
+for(size_t i=0; i< ptsx_map.size(); i++){
+	double dx = ptsx_map[i] - px;
     double dy = ptsy_map[i] - py;
     ptsx_car[i] = dx * cos(-psi) - dy * sin(-psi);
     ptsy_car[i] = dx * sin(-psi) + dy * cos(-psi);
-  }
+}
 }
 
 bool check_kafka_connection() {
@@ -155,7 +155,7 @@ int main() {
     RdKafka::Conf *producerConf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
     producerConf->set("metadata.broker.list", brokers, errstr);
     RdKafka::Producer *producer = RdKafka::Producer::create(producerConf, errstr);
-	 if (!producer) {
+	if (!producer) {
         cerr << "Failed to create producer: " << errstr << endl;
         exit(1);
     }
@@ -287,16 +287,6 @@ int main() {
 				}
 			}
 		}
-		// } else {
-		// 	// Manual driving
-		// 	std::string msg = "42[\"manual\",{}]";
-		// 	producer->produce(topic, RdKafka::Topic::PARTITION_UA, 
-		// 							RdKafka::Producer::RK_MSG_COPY, 
-		// 							const_cast<char*>(msg.c_str()), 
-		// 							msg.size(), 
-		// 							NULL, NULL);
-		// 	producer->flush(1000);
-		// }
 	}
 	delete topic;
 }
